@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RiderTrackingController;
+use App\Http\Controllers\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,10 +17,18 @@ use App\Http\Controllers\RiderTrackingController;
 */
 
 Route::post('/save-rider-info', [RiderTrackingController::class, 'saveRiderInfo']);
+
+
 Route::get('/nearest-rider/{restaurant_id}', [RiderTrackingController::class, 'getNearestRider']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+Route::post('/add-product', [ProductController::class, 'saveProduct']);
+
+Route::post('/add-product-cat', [ProductController::class, 'saveProductCat']);
+
+Route::get('/products', [ProductController::class, 'getProduct']);
 

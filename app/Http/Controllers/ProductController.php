@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductCat;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -17,7 +19,7 @@ class ProductController extends Controller
     {
         $products = Product::latest()->paginate(5);
       
-        return view('products.index',compact('products'))
+        return view('products.index',data: compact('products'))
                     ->with('i', (request()->input('page', 1) - 1) * 5);
     }
 
@@ -86,5 +88,42 @@ class ProductController extends Controller
        
         return redirect()->route('products.index')
                         ->with('success','Product deleted successfully');
+    }
+
+    public function saveProductCat(Request $request){
+        $request->validate([
+            'name' => 'required|unique:product-cats',
+        ]);
+        ProductCat::create($request->all());
+        return response()->json(['message' => 'Product Category information saved successfully'], 201);
+    
+    }
+    
+    public function saveProduct(Request $request){
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|unique:products',
+            'price' => 'required|numeric',
+            'cat_id' => 'required|integer'
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        
+        Product::create($request->all());
+        return response()->json(['message' => 'Product information saved successfully'], 201);
+    
+    }
+
+    public function getProduct(Request $request){
+        //from product category model one to many
+        $product_cats = ProductCat::with('products')->get();
+        //from product model one to one
+        $products = Product::with('category')->get();
+        return response()->json(['message' => 'Product information get successfully','data'=>$products], 201);
+    
     }
 }
